@@ -169,26 +169,12 @@ class DatabaseOperations(BaseDatabaseOperations):
         value = super(DatabaseOperations, self).convert_values(value, field)
 
         db_type = field.db_type(self.connection)
-        if db_type == 'string' and isinstance(value, str):
-            value = value.decode("utf-8")
-        elif db_type == "datetime":
+        if db_type == "datetime":
             value = self.connection.ops.value_from_db_datetime(value)
         elif db_type == "date":
             value = self.connection.ops.value_from_db_date(value)
-        elif db_type == "time":
-            value = self.connection.ops.value_from_db_time(value)
-        elif db_type == "decimal":
-            value = self.connection.ops.value_from_db_decimal(value)
-        elif db_type == 'list':
-            if not value:
-                value = [] # Convert None back to an empty list
-        elif db_type == 'set':
-            if not value:
-                value = set()
-            else:
-                value = set(value)
-        else:
-            value = field.to_python(value)
+
+        value = field.to_python(value)
 
         return value
 
