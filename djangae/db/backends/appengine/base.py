@@ -187,6 +187,8 @@ class DatabaseOperations(BaseDatabaseOperations):
                 value = set()
             else:
                 value = set(value)
+        else:
+            value = field.to_python(value)
 
         return value
 

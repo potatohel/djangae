@@ -33,7 +33,9 @@ from djangae.db.utils import entity_matches_query
 from djangae.db.backends.appengine import caching
 from djangae.db.unique_utils import query_is_unique
 from djangae.db import transaction
-from djangae.fields import ComputedCharField, ShardedCounterField, SetField, ListField, GenericRelationField
+from djangae.fields import (
+    ComputedCharField, ShardedCounterField, SetField, ListField,
+    GenericRelationField, JSONField)
 from djangae.models import CounterShard
 from djangae.db.backends.appengine.dnf import parse_dnf
 from .storage import BlobstoreFileUploadHandler
@@ -1343,3 +1345,23 @@ class DatastorePaginatorTest(TestCase):
         self.assertEqual(p1.start_index(), 0)
         self.assertEqual(p1.end_index(), 0)
         self.assertEqual([x for x in p1], [])
+
+
+class ModelWithJSONField(models.Model):
+    foo = JSONField()
+
+
+class JSONFieldTests(TestCase):
+    def test_store_and_retrieve(self):
+        data = {'a': 1, 'b': 2, 'c': {'d': 4}}
+        ModelWithJSONField.objects.create(foo=data)
+
+        retrieved = ModelWithJSONField.objects.get()
+        self.assertEqual(retrieved.foo, data)
+
+    def test_store_and_retrieve_values(self):
+        data = {'a': 1, 'b': 2, 'c': {'d': 4}}
+        ModelWithJSONField.objects.create(foo=data)
+
+        retrieved = ModelWithJSONField.objects.values('foo')
+        self.assertEqual(retrieved[0]['foo'], data)
